@@ -178,7 +178,7 @@ class UserPhoneUpdateView(APIView):
     @extend_schema(
         request=UserPhoneVerificationSerializer,
         responses={
-            200: PhoneSerializer,
+            200: UserSerializer,
         },
         summary='Верифицировать код подтверждения',
         description='Верифицирует код подтверждения, в случаи успеха обновляет номер телефона пользователя',
@@ -194,7 +194,8 @@ class UserPhoneUpdateView(APIView):
             number=serializer.data['phone']['number'],
         )
 
-        return Response(result)
+        user_serializer = UserSerializer(request.user)
+        return Response(user_serializer.data)
 
 
 @extend_schema_view(
