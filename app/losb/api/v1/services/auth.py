@@ -80,7 +80,8 @@ class ExampleAuthentication(authentication.BaseAuthentication):
             # user = User.objects.get(telegram_id=decoded_token.get('telegram_id'))
             user_data = json.loads(decoded_token['user'])
             full_name = f'{user_data["first_name"]} {user_data["last_name"]}'
-            user, created = User.objects.get_or_create(telegram_id=user_data['id'], phone='+7-not-verified', full_name=full_name)
+            phone = Phone.objects.create(code=7)
+            user, created = User.objects.get_or_create(telegram_id=user_data['id'], phone=phone, full_name=full_name)
         except User.DoesNotExist:
             raise AuthenticationFailed('No such user')
 
