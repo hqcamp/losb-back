@@ -1,13 +1,12 @@
-from typing import Optional
-
-import urllib.parse, json
+import json
 import jwt
+import urllib.parse
+from app.settings import SECRET_KEY
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from rest_framework import authentication
 from rest_framework.exceptions import AuthenticationFailed
-
-from app.settings import SECRET_KEY
+from typing import Optional
 
 
 class TokenError(Exception):
@@ -71,7 +70,7 @@ class ExampleAuthentication(authentication.BaseAuthentication):
         #     raise TokenError(_("Token is invalid or expired")) from ex
 
         try:
-            decoded_token =  self.parse_authorization_header(raw_token)
+            decoded_token = self.parse_authorization_header(raw_token)
         except InvalidTokenError as ex:
             raise TokenError(_("Token is invalid or expired")) from ex
         
@@ -79,9 +78,7 @@ class ExampleAuthentication(authentication.BaseAuthentication):
             User = get_user_model()
             # user = User.objects.get(telegram_id=decoded_token.get('telegram_id'))
             user_data = json.loads(decoded_token['user'])
-            full_name = f'{user_data["first_name"]} {user_data["last_name"]}'
-            phone = Phone.objects.create(code=7)
-            user, created = User.objects.get_or_create(telegram_id=user_data['id'], phone=phone, full_name=full_name)
+            user = User.objects.get(telegram_id=user_data['id'])
         except User.DoesNotExist:
             raise AuthenticationFailed('No such user')
 
