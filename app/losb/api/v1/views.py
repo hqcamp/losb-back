@@ -66,7 +66,7 @@ class UserRetrieveView(generics.RetrieveAPIView):
 @extend_schema_view(
     update=extend_schema(
         responses={
-            200: UserNameSerializer,
+            200: UserSerializer,
         },
         summary='Изменение имени пользователя',
     ),
@@ -84,13 +84,14 @@ class UserNameUpdateView(generics.UpdateAPIView):
         serializer = self.get_serializer(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        response_serializer = UserSerializer(user)
+        return Response(response_serializer.data)
 
 
 @extend_schema_view(
     patch=extend_schema(
         responses={
-            200: UserCitySerializer,
+            200: UserSerializer,
         },
         summary='Изменение города пользователя',
     ),
@@ -103,15 +104,13 @@ class UserCityUpdateView(generics.UpdateAPIView):
     def get_object(self):
         return self.request.user
 
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
+    def patch(self, request, *args, **kwargs):
+        user = self.get_object()
+        serializer = self.get_serializer(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
+        serializer.save()
 
-        city = City.objects.get(id=serializer.validated_data['location'].id)
-        response_serializer = CitySerializer(city)
-
+        response_serializer = UserSerializer(user)
         return Response(response_serializer.data)
 
 
@@ -122,7 +121,7 @@ class UserBirthdayAPIView(APIView):
     @extend_schema(
         request=UserBirthdaySerializer,
         responses={
-            200: UserBirthdaySerializer,
+            200: UserSerializer,
         },
         summary='Установить дату рождения пользователя',
         description='Устанавливает дату рождения пользователя, если она ещё не была изменена',
@@ -134,7 +133,9 @@ class UserBirthdayAPIView(APIView):
         serializer = UserBirthdaySerializer(data=self.request.data)
         serializer.is_valid(raise_exception=True)
         serializer.update(self.request.user, serializer.validated_data)
-        return Response(serializer.data)
+
+        response_serializer = UserSerializer(self.request.user)
+        return Response(response_serializer.data)
 
 
 class UserPhoneUpdateView(APIView):
