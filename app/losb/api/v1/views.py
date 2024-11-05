@@ -9,6 +9,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django_filters import rest_framework as filters
 
 from app import settings
 from losb.api.v1 import exceptions
@@ -29,6 +30,8 @@ from losb.api.v1.services.last_message_service import LastMessageService
 from losb.models import City
 from losb.schema import TelegramIdJWTSchema  # do not remove, needed for swagger
 
+from losb.api.v1.filters import CityFilter
+
 
 @extend_schema_view(
     get=extend_schema(
@@ -44,6 +47,8 @@ class CityListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated, ]
     pagination_class = LimitOffsetPagination
     queryset = City.objects.all()
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = CityFilter
 
 
 @extend_schema_view(
@@ -165,9 +170,7 @@ class UserPhoneUpdateView(APIView):
                 number=serializer.data['number'],
             )
         except exceptions.SmsDeliveryError as e:
-            raise exceptions.SmsDeliveryError(
-                default_detail=f"Failed to send SMS: {e}",
-            )
+            raise exceptions.SmsDeliveryError(detail=f"Failed to send SMS: {e}")
 
         # TODO: remove otp from response, for debug only
         return Response(data={"otp": verification_code}, status=status.HTTP_200_OK)
