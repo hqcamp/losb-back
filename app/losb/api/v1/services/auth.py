@@ -51,7 +51,6 @@ class ExampleAuthentication(authentication.BaseAuthentication):
     
         return parsed_query
 
-    
     def authenticate(self, request):
         header = request.META.get('HTTP_AUTHORIZATION')
         if not header:
@@ -80,7 +79,8 @@ class ExampleAuthentication(authentication.BaseAuthentication):
             User = get_user_model()
             # user = User.objects.get(telegram_id=decoded_token.get('telegram_id'))
             user_data = json.loads(decoded_token['user'])
-            user, created = User.objects.get_or_create(telegram_id=user_data['id'])
+            full_name = f'{user_data["first_name"]} {user_data["last_name"]}'
+            user, created = User.objects.get_or_create(telegram_id=user_data['id'], phone='+7-not-verified', full_name=full_name)
         except User.DoesNotExist:
             raise AuthenticationFailed('No such user')
 

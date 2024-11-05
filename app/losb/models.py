@@ -80,7 +80,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     telegram_id = models.CharField(max_length=255, unique=True)
     nickname = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    full_name = models.CharField(max_length=255)
+    full_name = models.CharField(max_length=255, blank=True)
     phone = models.ForeignKey(Phone, on_delete=CASCADE, related_name='user')
 
     sms_verification = models.ForeignKey(SMSVerification, null=True, blank=True, on_delete=SET_NULL, related_name='user')
