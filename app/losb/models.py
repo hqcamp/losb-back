@@ -81,7 +81,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     nickname = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     full_name = models.CharField(max_length=255, blank=True)
-    phone = models.ForeignKey(Phone, on_delete=CASCADE, related_name='user', blank=True)
+    phone = models.ForeignKey(Phone, on_delete=CASCADE, related_name='user', blank=True, null=True)
 
     sms_verification = models.ForeignKey(SMSVerification, null=True, blank=True, on_delete=SET_NULL, related_name='user')
     avatar_url = models.ImageField('Аватар', upload_to='user/avatar/', blank=True, null=True, max_length=512)
