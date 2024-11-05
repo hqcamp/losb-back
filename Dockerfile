@@ -17,9 +17,11 @@ RUN poetry config virtualenvs.create false \
 
 COPY ./app /app
 
+RUN mkdir -p /app/logs
+
 ENV SERVICE_HOST="0.0.0.0" \
     SERVICE_PORT=8080
 
-CMD python manage.py migrate && python manage.py collectstatic --noinput && gunicorn --workers=1 --access-logfile - --error-logfile - --bind $SERVICE_HOST:$SERVICE_PORT  app.wsgi
+CMD python manage.py migrate && python manage.py collectstatic --noinput && gunicorn --workers=1 --bind $SERVICE_HOST:$SERVICE_PORT --access-logfile /app/logs/access.log app.wsgi
 
 EXPOSE 8080
