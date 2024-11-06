@@ -27,6 +27,12 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('telegram_id', 'avatar_url', 'full_name', 'phone', 'location', 'birthday')
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if representation.get('phone') is None:
+            representation['phone'] = {"code": "7", "number": ""}
+        return representation
+
 
 class UserNameSerializer(serializers.ModelSerializer):
     class Meta:
