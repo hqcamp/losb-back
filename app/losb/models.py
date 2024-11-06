@@ -4,6 +4,7 @@ from django.db.models import CASCADE, PROTECT, SET_NULL
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 from losb.api.v1.services.telegram_user_data import get_telegram_user_data
+from losb.api.v1.validators import validate_image_file
 
 from app import settings
 from app.settings import SMS_VERIFICATOIN_CODE_DIGITS
@@ -27,7 +28,7 @@ class SMSVerification(models.Model):
 
 class Phone(models.Model):
     code = models.CharField(max_length=4)
-    number = models.CharField(null=True, blank=True, max_length=15) #TODO: should regex validation be added?
+    number = models.CharField(blank=True, max_length=15, default='') #TODO: should regex validation be added?
 
     def __str__(self):
         return f'+{self.code}{self.number if self.number else "-not-verified"}'
@@ -78,18 +79,25 @@ class CustomUserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     telegram_id = models.CharField(max_length=255, unique=True)
-    nickname = models.CharField(max_length=255, null=True, blank=True)
+    nickname = models.CharField(max_length=255, blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     full_name = models.CharField(max_length=255, blank=True)
     phone = models.ForeignKey(Phone, on_delete=CASCADE, related_name='user', blank=True, null=True)
 
     sms_verification = models.ForeignKey(SMSVerification, null=True, blank=True, on_delete=SET_NULL, related_name='user')
-    avatar_url = models.ImageField('Аватар', upload_to='user/avatar/', blank=True, null=True, max_length=512)
+    avatar_url = models.ImageField(
+        'Аватар',
+        upload_to='user/avatar/',
+        blank=True,
+        null=True,
+        max_length=512,
+        validators=[validate_image_file]
+    )
     birthday = models.DateTimeField(null=True, blank=True, default=None)
     location = models.ForeignKey(City, on_delete=PROTECT, related_name='user', blank=True, null=True)
 
-    username = models.CharField(max_length=255, blank=True, null=True)
-    password = models.CharField(max_length=255, blank=True, null=True)
+    username = models.CharField(max_length=255, blank=True, default='')
+    password = models.CharField(max_length=255, blank=True, default='')
     last_login = None
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
