@@ -5,6 +5,7 @@ from app import settings
 from losb.api.v1 import exceptions
 from losb.api.v1.serializers import PhoneSerializer, SMSVerificationSerializer
 from losb.api.v1.services.sms_sender import SmsRuService
+from losb.models import Phone
 
 
 class SmsVerificationService:
