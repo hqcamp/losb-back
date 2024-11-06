@@ -18,11 +18,8 @@ class SmsVerificationService:
         return "".join(SystemRandom().choice('123456789') for _ in range(settings.SMS_VERIFICATOIN_CODE_DIGITS))
 
     def request_verification(self, code, number):
-        if not self.user.phone:
-            self.user.phone = Phone.objects.create(code=7)
-            self.user.save()
         # Check if phone is already verified
-        if self.user.phone.code == code[1:] and self.user.phone.number == number:
+        if self.user.phone is not None and self.user.phone.code == code[1:] and self.user.phone.number == number:
             raise exceptions.PhoneAlreadyVerified()
 
         # Check cooldown period

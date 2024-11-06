@@ -145,7 +145,7 @@ class UserBirthdayAPIView(APIView):
 
 class UserPhoneUpdateView(APIView):
     permission_classes = [IsAuthenticated, ]
-    http_method_names = ["post", "put"]
+    http_method_names = ["post", "patch"]
 
     @staticmethod
     def get_otp():
@@ -183,12 +183,12 @@ class UserPhoneUpdateView(APIView):
         summary='Верифицировать код подтверждения',
         description='Верифицирует код подтверждения, в случаи успеха обновляет номер телефона пользователя',
     )
-    def put(self, request):
+    def patch(self, request):
         serializer = UserPhoneVerificationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         service = SmsVerificationService(request.user)
-        result = service.verify_code(
+        service.verify_code(
             otp=serializer.data['otp'],
             code=serializer.data['phone']['code'],
             number=serializer.data['phone']['number'],
