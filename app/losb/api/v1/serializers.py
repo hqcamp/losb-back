@@ -9,7 +9,7 @@ class PhoneSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         if instance is None:
-            return {}
+            return {"code": "7", "number": ""}
         return super().to_representation(instance)
 
 
