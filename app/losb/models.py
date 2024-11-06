@@ -30,7 +30,7 @@ class Phone(models.Model):
     number = models.CharField(null=True, blank=True, max_length=15) #TODO: should regex validation be added?
 
     def __str__(self):
-        return f'+{self.code}{self.number if self.number else '-not-verified'}'
+        return f'+{self.code}{self.number if self.number else "-not-verified"}'
 
 
 class CustomUserManager(BaseUserManager):

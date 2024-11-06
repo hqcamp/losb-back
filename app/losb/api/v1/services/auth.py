@@ -78,7 +78,9 @@ class ExampleAuthentication(authentication.BaseAuthentication):
             User = get_user_model()
             # user = User.objects.get(telegram_id=decoded_token.get('telegram_id'))
             user_data = json.loads(decoded_token['user'])
-            user = User.objects.get(telegram_id=user_data['id'])
+
+            # temp user create для демки
+            user = User.objects.get_or_create(telegram_id=user_data['id'])
         except User.DoesNotExist:
             raise AuthenticationFailed('No such user')
 
