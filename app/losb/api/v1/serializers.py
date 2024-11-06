@@ -7,6 +7,11 @@ class PhoneSerializer(serializers.ModelSerializer):
         model = Phone
         fields = ('code', 'number')
 
+    def to_representation(self, instance):
+        if instance is None:
+            return {}
+        return super().to_representation(instance)
+
 
 class CitySerializer(serializers.ModelSerializer):
     class Meta:
