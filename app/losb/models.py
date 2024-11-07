@@ -42,7 +42,7 @@ class CustomUserManager(BaseUserManager):
     Custom user model manager where email is the unique identifiers
     for authentication instead of usernames.
     """
-    def create_user(self, telegram_id, password, **extra_fields):
+    def create_user(self, telegram_id, password=None, **extra_fields):
         """
         Create and save a user with the given telegram_id and password.
         """
@@ -59,7 +59,12 @@ class CustomUserManager(BaseUserManager):
 
         phone = Phone.objects.create(code=7)
         user = self.model(telegram_id=telegram_id, phone=phone, full_name=full_name, nickname=username, **extra_fields)
-        user.set_password(password)
+
+        if password:
+            user.set_password(password)
+        else:
+            user.set_unusable_password()
+
         user.save()
         return user
 
