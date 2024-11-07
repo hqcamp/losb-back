@@ -44,10 +44,14 @@ class SmsRuService:
 
             result = response.json()
 
-            if result.get('status') != 'OK':
-                # TODO: iterate over sms field, collecting erroneous status codes
-                raise exceptions.SmsDeliveryError(f"SMS service unavailable: {result.get('status_text', 
-                                                                                         'Unknown error')}")
+            if result.get('status') == 'OK':
+                for phone, info in result.get('sms', {}).items():
+                    if info.get('status') != 'OK':
+                        raise exceptions.SmsDeliveryError(
+                            f"Error sending to {phone}: {info.get('status_text', 'Unknown error')}")
+            else:
+                raise exceptions.SmsDeliveryError(
+                    f"SMS service unavailable: {result.get('status_text', 'Unknown error')}")
 
             return result
 
@@ -55,4 +59,4 @@ class SmsRuService:
             raise exceptions.SmsDeliveryError(f"SMS service unavailable: {str(e)}")
 
         except Exception as e:
-            raise exceptions.SmsDeliveryError(f"Failed to send SMS: {str(e)}")
+            raise exceptions.SmsDeliveryError(f"{str(e)}")
