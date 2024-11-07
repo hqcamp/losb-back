@@ -80,12 +80,11 @@ class ExampleAuthentication(authentication.BaseAuthentication):
             user_data = json.loads(decoded_token['user'])
 
             # temp user create для демки
-            # username = user_data['username']
-            # full_name = f"{user_data['first_name']} {user_data['last_name']}".strip()
-            # user, created = User.objects.get_or_create(telegram_id=user_data['id'], defaults={'full_name': full_name,
-            #                                                                                   'username': username,
-            #                                                                                   })
-            user, created = User.objects.get_or_create(telegram_id=user_data['id'])
+            username = user_data['username']
+            full_name = f"{user_data['first_name']} {user_data['last_name']}".strip()
+            user, created = User.objects.get_or_create(telegram_id=user_data['id'], defaults={'full_name': full_name,
+                                                                                              'username': username,
+                                                                                              })
         except User.DoesNotExist:
             raise AuthenticationFailed('No such user')
 

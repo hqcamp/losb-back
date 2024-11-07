@@ -4,7 +4,6 @@ from django.db.models import CASCADE, PROTECT, SET_NULL
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 from losb.api.v1.services.telegram_user_data import get_telegram_user_data
-from losb.api.v1.validators import validate_image_file
 
 from app import settings
 from app.settings import SMS_VERIFICATOIN_CODE_DIGITS
@@ -42,7 +41,7 @@ class CustomUserManager(BaseUserManager):
     Custom user model manager where email is the unique identifiers
     for authentication instead of usernames.
     """
-    def create_user(self, telegram_id, password=None, **extra_fields):
+    def create_user(self, telegram_id, password, **extra_fields):
         """
         Create and save a user with the given telegram_id and password.
         """
@@ -59,12 +58,7 @@ class CustomUserManager(BaseUserManager):
 
         phone = Phone.objects.create(code=7)
         user = self.model(telegram_id=telegram_id, phone=phone, full_name=full_name, nickname=username, **extra_fields)
-
-        if password:
-            user.set_password(password)
-        else:
-            user.set_unusable_password()
-
+        user.set_password(password)
         user.save()
         return user
 
@@ -98,8 +92,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         upload_to='user/avatar/',
         blank=True,
         null=True,
-        max_length=512,
-        validators=[validate_image_file]
+        max_length=512
     )
     birthday = models.DateTimeField(null=True, blank=True, default=None)
     location = models.ForeignKey(City, on_delete=PROTECT, related_name='user', blank=True, null=True)
