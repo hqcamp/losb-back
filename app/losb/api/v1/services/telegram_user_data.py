@@ -1,8 +1,6 @@
 import requests
 from django.contrib.auth import get_user_model
 
-User = get_user_model()
-
 
 def get_telegram_user_data(telegram_id: int, bot_token: str):
     """
@@ -31,6 +29,8 @@ def get_or_create_user(user_data: dict):
     """
     Get or create user via parsed Telegram initData.
     """
+    User = get_user_model()
+
     first_name = user_data.get("first_name", "")
     last_name = user_data.get("last_name", "")
     username = user_data.get("username", "")
