@@ -7,8 +7,8 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import authentication
 from rest_framework.exceptions import AuthenticationFailed
 from typing import Optional
+from losb.api.v1.services.telegram_user_data import get_or_create_user
 
-#test
 class TokenError(Exception):
     pass
 
@@ -78,13 +78,13 @@ class ExampleAuthentication(authentication.BaseAuthentication):
             User = get_user_model()
             # user = User.objects.get(telegram_id=decoded_token.get('telegram_id'))
             user_data = json.loads(decoded_token['user'])
-
+            user = get_or_create_user(user_data)
             # temp user create для демки
-            username = user_data['username']
-            full_name = f"{user_data['first_name']} {user_data['last_name']}".strip()
-            user, created = User.objects.get_or_create(telegram_id=user_data['id'], defaults={'full_name': full_name,
-                                                                                              'username': username,
-                                                                                              })
+            # username = user_data['username']
+            # full_name = f"{user_data['first_name']} {user_data['last_name']}".strip()
+            # user, created = User.objects.get_or_create(telegram_id=user_data['id'], defaults={'full_name': full_name,
+            #                                                                                   'username': username,
+            #                                                                                   })
         except User.DoesNotExist:
             raise AuthenticationFailed('No such user')
 
