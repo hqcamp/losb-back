@@ -25,6 +25,9 @@ class SMSVerification(models.Model):
     attempts = models.SmallIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"ID: {self.id}, OTP: {self.otp}"
+
 
 class Phone(models.Model):
     code = models.CharField(max_length=4)
