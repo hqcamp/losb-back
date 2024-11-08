@@ -3,7 +3,7 @@ from django.contrib.auth.models import PermissionsMixin
 from django.db.models import CASCADE, PROTECT, SET_NULL
 from django.utils.translation import gettext_lazy as _
 from django.db import models
-from losb.api.v1.services.telegram_user_data import get_telegram_user_data
+from losb.api.v1.services.telegram_user_data import get_telegram_user_data, prepare_user_data
 
 from app import settings
 from app.settings import SMS_VERIFICATOIN_CODE_DIGITS
@@ -50,14 +50,16 @@ class CustomUserManager(BaseUserManager):
 
         bot_token = settings.TELEGRAM_BOT_TOKEN
         user_data = get_telegram_user_data(telegram_id, bot_token)
-
-        first_name = user_data.get("first_name", "")
-        last_name = user_data.get("last_name", "")
-        username = user_data.get("username", "")
-        full_name = f"{last_name} {first_name}".strip()
+        prepared_user_data = prepare_user_data(user_data)
 
         phone = Phone.objects.create(code=7)
-        user = self.model(telegram_id=telegram_id, phone=phone, full_name=full_name, nickname=username, **extra_fields)
+        user = self.model(
+            telegram_id=telegram_id,
+            phone=phone,
+            full_name=prepared_user_data['full_name'],
+            nickname=prepared_user_data['nickname'],
+            **extra_fields
+        )
         user.set_password(password)
         user.save()
         return user

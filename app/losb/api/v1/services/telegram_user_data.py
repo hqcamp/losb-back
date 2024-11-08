@@ -25,19 +25,31 @@ def get_telegram_user_data(telegram_id: int, bot_token: str):
         return {"first_name": "", "last_name": "", "username": ""}
 
 
-def get_or_create_user(user_data: dict):
+def prepare_user_data(user_data):
     """
-    Get or create user via parsed Telegram initData.
+    Prepare data for user creation.
     """
-    User = get_user_model()
-
     first_name = user_data.get("first_name", "")
     last_name = user_data.get("last_name", "")
     username = user_data.get("username", "")
     full_name = f"{last_name} {first_name}".strip()
 
+    return {
+        'nickname': username,
+        'full_name': full_name
+    }
+
+
+def get_or_create_user(user_data: dict):
+    """
+    Get or create user based on prepared data.
+    """
+    User = get_user_model()
+
+    prepared_user_data = prepare_user_data(user_data)
+
     user, created = User.objects.update_or_create(telegram_id=user_data['id'],
-                                                  defaults={'full_name': full_name,
-                                                            'nickname': username,
+                                                  defaults={'full_name': prepared_user_data['full_name'],
+                                                            'nickname': prepared_user_data['nickname'],
                                                             })
     return user
