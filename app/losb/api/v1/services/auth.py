@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import authentication
 from rest_framework.exceptions import AuthenticationFailed
 from typing import Optional
-from losb.api.v1.services.telegram_user_data import get_or_create_user, get_telegram_user_data, prepare_user_data
+from losb.api.v1.services.telegram_user_data import get_or_create_user, get_telegram_user_data
 
 
 class TokenError(Exception):
