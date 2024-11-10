@@ -9,7 +9,7 @@ from losb.api.v1.views import (
     UserCityUpdateView,
     UserBirthdayAPIView,
     UserPhoneUpdateView,
-    CityListView, TechSupportAPIView, LastMessageAPIView
+    CityListView, TechSupportAPIView, LastMessageAPIView, TelegramWebhookAPIView
 )
 
 app_name = 'losb'
@@ -26,4 +26,5 @@ urlpatterns = [
     path('user/phone', UserPhoneUpdateView.as_view(), name='user-phone'),
     path('user/avatar', UserAvatarUpdateView.as_view(), name='user-avatar-upload'),
     path('user/last-message', LastMessageAPIView.as_view(), name='last-message'),
+    path('webhook', TelegramWebhookAPIView.as_view(), name='webhook'),
 ]

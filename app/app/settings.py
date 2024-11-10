@@ -23,7 +23,7 @@ SMS_RU_API_KEY = env.str('SMS_RU_API_KEY')
 DEBUG = env.bool('DEBUG', default=False)
 
 ALLOWED_HOSTS = ['*']
-
+DOMAIN_NAME = env.str('DOMAIN_NAME', '')
 
 # Application definition
 PROJECT_APPS = [
@@ -118,12 +118,9 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_standardized_errors.openapi.AutoSchema',
     'EXCEPTION_HANDLER': 'drf_standardized_errors.handler.exception_handler',
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'losb.api.v1.services.auth.ExampleAuthentication', #TODO: rename
+        'losb.api.v1.services.auth.CustomAuthentication',
         'rest_framework.authentication.SessionAuthentication'
     ],
-    # 'DEFAULT_PERMISSION_CLASSES':[
-    #     'rest_framework.permissions.AllowAny'
-    # ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 15,
 }

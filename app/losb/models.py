@@ -1,8 +1,10 @@
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db.models import CASCADE, PROTECT, SET_NULL
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.db import models
+from datetime import timezone as dt_timezone
 from losb.api.v1.services.telegram_user_data import get_telegram_user_data, prepare_user_data
 
 from app import settings
@@ -109,3 +111,21 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
     objects = CustomUserManager()
+
+    def save(self, *args, **kwargs):
+        # Makes birthday field insensitive to timezones
+        if self.birthday and timezone.is_aware(self.birthday):
+            self.birthday = timezone.make_naive(self.birthday, timezone=dt_timezone.utc)
+        super().save(*args, **kwargs)
+
+
+class MessageLog(models.Model):
+    chat_id = models.CharField(max_length=255, unique=True)
+    text = models.TextField()
+    sent_at = models.DateTimeField(null=True, blank=True, default=None)
+
+    class Meta:
+        ordering = ['-sent_at']
+
+    def __str__(self):
+        return f'{self.chat_id} - {self.text} - {self.sent_at}'

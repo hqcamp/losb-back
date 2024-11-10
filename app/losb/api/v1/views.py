@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from random import SystemRandom
 
+from datetime import datetime, timezone
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework import generics, status
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django_filters import rest_framework as filters
@@ -26,8 +27,8 @@ from losb.api.v1.serializers import (
     BotUrlSerializer,
 )
 from losb.api.v1.services.sms_verification import SmsVerificationService
-from losb.api.v1.services.last_message_service import LastMessageService
-from losb.models import City
+from losb.api.v1.services.webhook_last_message_service import WebhookLastMessageService
+from losb.models import City, MessageLog
 from losb.schema import TelegramIdJWTSchema  # do not remove, needed for swagger
 
 from losb.api.v1.filters import CityFilter
@@ -264,7 +265,7 @@ class LastMessageAPIView(generics.GenericAPIView):
     http_method_names = ['get']
 
     def get(self, request):
-        service = LastMessageService(request.user.telegram_id)
+        service = WebhookLastMessageService(request.user.telegram_id)
 
         last_message_info, error = service.get_last_message()
         avatar_url = service.get_avatar_url()
@@ -275,5 +276,26 @@ class LastMessageAPIView(generics.GenericAPIView):
         return Response({
             'avatar_url': avatar_url,
             'message': last_message_info['message'] if last_message_info else None,
-            'time': last_message_info['time'] if last_message_info else None,
+            'time': last_message_info['time'].strftime('%H:%M') if last_message_info else None,
         })
+
+
+class TelegramWebhookAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        update = request.data
+
+        if 'message' in update:
+            message = update['message']
+            chat_id = message['chat']['id']
+            text = message.get('text', '')
+            timestamp = datetime.fromtimestamp(message['date'], tz=timezone.utc)
+
+            MessageLog.objects.update_or_create(
+                chat_id=chat_id,
+                defaults={'text': text, 'sent_at': timestamp}
+            )
+
+        return Response({"status": "ok"}, status=200)
+

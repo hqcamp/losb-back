@@ -22,7 +22,7 @@ class InvalidInitDataError(Exception):
     pass
 
 
-class ExampleAuthentication(authentication.BaseAuthentication):
+class CustomAuthentication(authentication.BaseAuthentication):
     def get_raw_token(self, header: bytes) -> Optional[bytes]:
         """
         Extracts an unvalidated JSON web token from the given "Authorization"
