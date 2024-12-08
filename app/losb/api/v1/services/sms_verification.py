@@ -15,7 +15,7 @@ class SmsVerificationService:
 
     @staticmethod
     def generate_otp():
-        return "".join(SystemRandom().choice('123456789') for _ in range(settings.SMS_VERIFICATOIN_CODE_DIGITS))
+        return "".join(SystemRandom().choice('123456789') for _ in range(settings.SMS_VERIFICATION_CODE_DIGITS))
 
     def request_verification(self, code, number):
         if not self.user.phone:

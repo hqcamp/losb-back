@@ -150,7 +150,7 @@ class UserPhoneUpdateView(APIView):
 
     @staticmethod
     def get_otp():
-        return "".join(SystemRandom().choice('123456789') for _ in range(settings.SMS_VERIFICATOIN_CODE_DIGITS))
+        return "".join(SystemRandom().choice('123456789') for _ in range(settings.SMS_VERIFICATION_CODE_DIGITS))
 
     @extend_schema(
         request=UserPhoneSerializer,

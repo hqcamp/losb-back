@@ -8,7 +8,6 @@ from datetime import timezone as dt_timezone
 from losb.api.v1.services.telegram_user_data import get_telegram_user_data, prepare_user_data
 
 from app import settings
-from app.settings import SMS_VERIFICATOIN_CODE_DIGITS
 
 
 class City(models.Model):
@@ -22,7 +21,7 @@ class City(models.Model):
 
 
 class SMSVerification(models.Model):
-    otp = models.CharField(max_length=settings.SMS_VERIFICATOIN_CODE_DIGITS)
+    otp = models.CharField(max_length=settings.SMS_VERIFICATION_CODE_DIGITS)
     attempts = models.SmallIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
