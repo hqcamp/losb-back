@@ -24,6 +24,14 @@ django-debug-toolbar = "^4.4.6"
 requests = "^2.32.3"
 gunicorn = "^20.1.0"
 django-cors-headers = "^4.6.0"
+ffmpeg-python = "^0.2.0"
+django-storages = {extras = ["s3"], version = "^1.14.4"}
+boto3 = "^1.35.68"
+geopy = "^2.4.1"
+celery = "^5.4.0"
+django-redis = "^5.4.0"
+django-celery-beat = "^2.7.0"
+imageio-ffmpeg = "^0.5.1"
 
 
 [build-system]

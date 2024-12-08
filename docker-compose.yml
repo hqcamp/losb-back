@@ -13,6 +13,9 @@ services:
       - .env
     depends_on:
       - db
+      - redis
+      - celery-worker
+      - celery-beat
     networks:
       - django_network
     volumes:
@@ -29,6 +32,43 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    networks:
+      - django_network
+
+  redis:
+    image: redis:7.0.5-alpine
+    container_name: redis
+    restart: always
+    networks:
+      - django_network
+
+  celery-worker:
+    build:
+      context: .
+    container_name: celery-worker
+    command: celery -A app worker --loglevel=INFO
+    env_file:
+      - .env
+    volumes:
+      - ./app:/app
+    depends_on:
+      - redis
+      - db
+    networks:
+      - django_network
+
+  celery-beat:
+    build:
+      context: .
+    container_name: celery-beat
+    command: celery -A app beat --loglevel=INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    env_file:
+      - .env
+    volumes:
+      - ./app:/app
+    depends_on:
+      - redis
+      - db
     networks:
       - django_network
 

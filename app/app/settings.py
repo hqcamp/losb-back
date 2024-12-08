@@ -19,6 +19,11 @@ SMS_VERIFICATION_RESEND_COOLDOWN = env.int('SMS_VERIFICATION_RESEND_COOLDOWN')
 SMS_VERIFICATION_ATTEMPTS = env.int('SMS_VERIFICATION_ATTEMPTS')
 SMS_RU_API_KEY = env.str('SMS_RU_API_KEY')
 
+USE_S3 = env.bool('USE_S3', False)
+
+COORD_DECIMAL_PLACES = env.int('COORD_DECIMAL_PLACES')
+MAX_FILE_SIZE_MB = env.int('MAX_FILE_SIZE_MB')
+
 DEBUG = env.bool('DEBUG', default=False)
 
 ALLOWED_HOSTS = ['*']
@@ -26,7 +31,8 @@ DOMAIN_NAME = env.str('DOMAIN_NAME', '')
 
 # Application definition
 PROJECT_APPS = [
-    'losb'
+    'losb',
+    'ambassador',
 ]
 
 INSTALLED_APPS = [
@@ -44,6 +50,8 @@ INSTALLED_APPS = [
     'django_extensions',
     'debug_toolbar',
     'corsheaders',
+    'storages',
+    'django_celery_beat',
     *PROJECT_APPS
 ]
 
@@ -205,5 +213,43 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'boto3': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'botocore': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
     },
 }
+
+if USE_S3:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "bucket_name": env.str('S3_BUCKET_NAME'),
+                "access_key": env.str('S3_ACCESS_KEY'),
+                "secret_key": env.str('S3_SECRET_ACCESS_KEY'),
+                "endpoint_url": env.str('S3_URL'),
+                "default_acl": "public-read",
+                "querystring_auth": False,
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+
+# CELERY SETTINGS
+CELERY_BROKER_URL = env.str('CELERY_BROKER_URL', default='redis://redis:6379/0')
+CELERY_RESULT_BACKEND = env.str('CELERY_RESULT_BACKEND', default='redis://redis:6379/0')
+
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIME_ZONE = 'Europe/Belgrade'
+
+# CELERY BEAT
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'

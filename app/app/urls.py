@@ -17,6 +17,7 @@ from django.conf.urls.static import static
 
 app_urls = [
     path('', include('losb.api.urls')),
+    path('', include('ambassador.api.urls')),
 ]
 
 api_urls = [
