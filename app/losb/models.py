@@ -20,6 +20,11 @@ class City(models.Model):
         return f'{self.name}'
 
 
+class TGVerification(models.Model):
+    request_id = models.CharField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 class SMSVerification(models.Model):
     otp = models.CharField(max_length=settings.SMS_VERIFICATION_CODE_DIGITS)
     attempts = models.SmallIntegerField(default=0)
@@ -87,8 +92,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     nickname = models.CharField(max_length=255, blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     full_name = models.CharField(max_length=255, blank=True)
-    phone = models.ForeignKey(Phone, on_delete=CASCADE, related_name='user', blank=True, null=True)
-
+    phone = models.ForeignKey(Phone, on_delete=SET_NULL, related_name='user', blank=True, null=True)
+    tg_verification = models.ForeignKey(TGVerification, null=True, blank=True, on_delete=SET_NULL, related_name='user')
     sms_verification = models.ForeignKey(SMSVerification, null=True, blank=True, on_delete=SET_NULL, related_name='user')
     avatar_url = models.ImageField(
         'Аватар',

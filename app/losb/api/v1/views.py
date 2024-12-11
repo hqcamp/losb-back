@@ -23,15 +23,19 @@ from losb.api.v1.serializers import (
     UserPhoneSerializer,
     CitySerializer,
     UserPhoneVerificationSerializer,
+    UserPhoneTGVerificationSerializer,
     PhoneSerializer,
     BotUrlSerializer,
 )
 from losb.api.v1.services.sms_verification import SmsVerificationService
+from losb.api.v1.services.telegram_verification import TelegramVerificationService
 from losb.api.v1.services.webhook_last_message_service import WebhookLastMessageService
 from losb.models import City, MessageLog
 from losb.schema import TelegramIdJWTSchema  # do not remove, needed for swagger
 
 from losb.api.v1.filters import CityFilter
+
+from losb.models import SMSVerification, TGVerification
 
 
 @extend_schema_view(
@@ -164,39 +168,52 @@ class UserPhoneUpdateView(APIView):
         serializer = UserPhoneSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        try:
-            service = SmsVerificationService(request.user)
-            verification_code = service.request_verification(
-                code=serializer.data['code'],
-                number=serializer.data['number'],
-            )
-        except exceptions.SmsDeliveryError as e:
-            raise exceptions.SmsDeliveryError(detail=f"Failed to send SMS: {e}")
+        service = TelegramVerificationService(request.user)
+        code = serializer.data['code']
+        number = serializer.data['number']
 
-        # TODO: remove otp from response, for debug only
-        return Response(data={"otp": verification_code}, status=status.HTTP_200_OK)
+        try:
+            request_id = service.send_verification_code(code=code, number=number)
+        except exceptions.SmsDeliveryError as e:
+            raise exceptions.SmsDeliveryError(detail=f"Failed to send verification code: {e}")
+
+        if not request.user.tg_verification:
+            request.user.tg_verification = TGVerification.objects.create(request_id=request_id)
+        else:
+            request.user.tg_verification.request_id = request_id
+            request.user.tg_verification.save()
+
+        request.user.save()
+
+        return Response(data={"message": "Verification code sent via Telegram"}, status=status.HTTP_200_OK)
 
     @extend_schema(
-        request=UserPhoneVerificationSerializer,
+        request=UserPhoneTGVerificationSerializer,
         responses={
             200: UserSerializer,
         },
         summary='Верифицировать код подтверждения',
-        description='Верифицирует код подтверждения, в случаи успеха обновляет номер телефона пользователя',
+        description='Верифицирует код подтверждения, в случае успеха обновляет номер телефона пользователя',
     )
     def patch(self, request):
-        serializer = UserPhoneVerificationSerializer(data=request.data)
+        serializer = UserPhoneTGVerificationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        service = SmsVerificationService(request.user)
-        service.verify_code(
-            otp=serializer.data['otp'],
-            code=serializer.data['phone']['code'],
-            number=serializer.data['phone']['number'],
-        )
+        service = TelegramVerificationService(request.user)
+        otp = serializer.validated_data["otp"]
+
+        try:
+            service.verify_code(request_id=request.user.tg_verification.request_id, user_code=otp)
+        except exceptions.SmsVerificationFailed as e:
+            raise exceptions.SmsVerificationFailed(detail=str(e))
+
+        request.user.phone.code = serializer.data["phone"]["code"]
+        request.user.phone.number = serializer.data["phone"]["number"]
+        request.user.phone.save()
+        request.user.tg_verification.delete()
 
         user_serializer = UserSerializer(request.user)
-        return Response(user_serializer.data)
+        return Response(user_serializer.data, status=status.HTTP_200_OK)
 
 
 @extend_schema_view(

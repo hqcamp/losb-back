@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from django.contrib import admin
-from losb.models import User, Phone, City, SMSVerification, MessageLog
+from losb.models import User, Phone, City, SMSVerification, MessageLog, TGVerification
 
 
 @admin.register(User)
@@ -28,3 +28,8 @@ class SMSVerificationAdmin(admin.ModelAdmin):
 @admin.register(MessageLog)
 class MessageLogAdmin(admin.ModelAdmin):
     list_display = ("id", "chat_id", "text", "sent_at")
+
+
+@admin.register(TGVerification)
+class TGVerificationAdmin(admin.ModelAdmin):
+    list_display = ("id", "request_id", 'created_at')
