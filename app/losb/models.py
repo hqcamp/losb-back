@@ -133,3 +133,35 @@ class MessageLog(models.Model):
 
     def __str__(self):
         return f'{self.chat_id} - {self.text} - {self.sent_at}'
+
+
+class PhoneVerificationSettings(models.Model):
+    CHOICES = [
+        ("TELEGRAM", "TG_VERIFICATION"),
+        ("SMS", "SMS_VERIFICATION"),
+    ]
+    selected_option = models.CharField(
+        max_length=100,
+        choices=CHOICES,
+        default="TELEGRAM",
+        verbose_name="Выбранная опция"
+    )
+    tg_verification_token = models.CharField(
+        max_length=255,
+        blank=True,
+        default='',
+        verbose_name="Токен для верификации номера телефона через Telegram"
+    )
+    sms_verification_token = models.CharField(
+        max_length=255,
+        blank=True,
+        default='',
+        verbose_name="Токен для верификации номера телефона через SMS"
+    )
+
+    def __str__(self):
+        return "Настройки верификации"
+
+    class Meta:
+        verbose_name = "Настройки верификации"
+        verbose_name_plural = "Настройки верификации"

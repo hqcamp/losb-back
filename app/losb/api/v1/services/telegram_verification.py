@@ -2,15 +2,16 @@ import requests
 from django.conf import settings
 from losb.api.v1 import exceptions
 
-from losb.models import Phone
+from losb.models import Phone, PhoneVerificationSettings
 
 
 class TelegramVerificationService:
     BASE_URL = settings.TELEGRAM_GATEWAY_BASE_URL
 
     def __init__(self, user):
+        verification_settings = PhoneVerificationSettings.objects.first()
         self.user = user
-        self.token = settings.TELEGRAM_GATEWAY_API_TOKEN
+        self.token = verification_settings.tg_verification_token
         self.headers = {
             'Authorization': f'Bearer {self.token}',
             'Content-Type': 'application/json'

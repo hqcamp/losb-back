@@ -4,13 +4,15 @@ import requests
 from django.conf import settings
 
 from losb.api.v1 import exceptions
+from losb.models import PhoneVerificationSettings
 
 
 class SmsRuService:
     BASE_URL = "https://sms.ru/sms/send"
 
     def __init__(self):
-        self.api_key = settings.SMS_RU_API_KEY
+        verification_settings = PhoneVerificationSettings.objects.first()
+        self.api_key = verification_settings.sms_verification_token
         self.default_params = {
             'api_id': self.api_key,
             'json': 1
