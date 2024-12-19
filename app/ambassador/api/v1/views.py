@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import ListAPIView
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
@@ -60,3 +61,21 @@ class VideoViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+@extend_schema_view(
+    get=extend_schema(
+        responses={
+            200: VideoSerializer,
+        },
+        summary='Список историй пользователя',
+        description='Возвращает список историй пользователя',
+    ),
+)
+class UserStoriesView(ListAPIView):
+    serializer_class = VideoSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        return Video.objects.filter(user=self.request.user)
