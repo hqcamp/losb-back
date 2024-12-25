@@ -13,6 +13,11 @@ VideoSerializer
 from ambassador.models import Video
 from ambassador.api.v1.services.radius_calculation import CoordinatesService
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 
 @extend_schema_view(
     list=extend_schema(
@@ -60,7 +65,10 @@ class VideoViewSet(ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        try:
+            serializer.save(user=self.request.user)
+        except Exception as e:
+            logger.error(f"Error: {str(e)}", exc_info=True)
 
 
 @extend_schema_view(
