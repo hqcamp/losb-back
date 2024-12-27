@@ -70,6 +70,14 @@ class VideoViewSet(ModelViewSet):
         except Exception as e:
             logger.error(f"Error: {str(e)}", exc_info=True)
 
+    def create(self, request, *args, **kwargs):
+        try:
+            response = super().create(request, *args, **kwargs)
+            return response
+        except Exception as e:
+            logger.error(f"Error in create method: {str(e)}", exc_info=True)
+            raise e
+
 
 @extend_schema_view(
     get=extend_schema(
