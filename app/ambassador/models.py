@@ -5,6 +5,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from ambassador.api.v1.validators import validate_location, validate_file_size
 from ambassador.api.v1.services.video_processing import VideoProcessingService
+from ambassador.api.v1.services.unique_naming import unique_upload_to
 import os
 import logging
 
@@ -18,7 +19,7 @@ class Video(models.Model):
     location = models.JSONField(default=dict)
     duration = models.DurationField(blank=True, null=True)
     thumbnail = models.ImageField(upload_to="thumbnails/", blank=True, null=True)
-    file_url = models.FileField(upload_to="videos/")
+    file_url = models.FileField(upload_to=unique_upload_to)
     created_at = models.DateTimeField(auto_now_add=True)
     comment = models.TextField(blank=True, null=True, max_length=100)
 
