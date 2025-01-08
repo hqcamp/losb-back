@@ -291,9 +291,6 @@ class LastMessageAPIView(generics.GenericAPIView):
         last_message_info, error = service.get_last_message()
         avatar_url = service.get_avatar_url()
 
-        if error:
-            return Response({'error': error}, status=400)
-
         return Response({
             'avatar_url': avatar_url,
             'message': last_message_info['message'] if last_message_info else None,
