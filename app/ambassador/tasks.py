@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 @shared_task
 def delete_outdated_videos():
-    threshold = timezone.now() - timedelta(hours=24)
+    threshold = timezone.now() - timedelta(hours=25)
     outdated_videos = Video.objects.filter(created_at__lte=threshold)
 
     for video in outdated_videos:

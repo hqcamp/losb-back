@@ -51,7 +51,7 @@ def get_or_create_user(user_data: dict):
 
     prepared_user_data = prepare_user_data(user_data)
 
-    user, created = User.objects.update_or_create(telegram_id=prepared_user_data['telegram_id'],
+    user, created = User.objects.get_or_create(telegram_id=prepared_user_data['telegram_id'],
                                                   defaults={'full_name': prepared_user_data['full_name'],
                                                             'nickname': prepared_user_data['nickname'],
                                                             })
