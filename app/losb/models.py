@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from django.db import models
 from datetime import timezone as dt_timezone
 from losb.api.v1.services.telegram_user_data import get_telegram_user_data, prepare_user_data
-
+from losb.api.v1.services.unique_naming import unique_upload_to
 from app import settings
 
 
@@ -97,7 +97,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     sms_verification = models.ForeignKey(SMSVerification, null=True, blank=True, on_delete=SET_NULL, related_name='user')
     avatar_url = models.ImageField(
         'Аватар',
-        upload_to='user/avatar/',
+        upload_to=unique_upload_to,
         blank=True,
         null=True,
         max_length=512
