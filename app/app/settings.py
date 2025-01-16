@@ -204,7 +204,7 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
-        'level': 'DEBUG',
+        'level': 'WARNING',
     },
     'loggers': {
         'django': {
@@ -214,16 +214,18 @@ LOGGING = {
         },
         'django.request': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': 'WARNING',
             'propagate': False,
         },
         'boto3': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'WARNING',
+            'propagate': False,
         },
         'botocore': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'WARNING',
+            'propagate': False,
         },
     },
 }
