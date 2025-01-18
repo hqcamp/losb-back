@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import requests
+from datetime import timedelta
+from django.utils import timezone
 from app.settings import AMBASSADOR_BOT_TOKEN
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework import status
@@ -22,7 +24,6 @@ from ambassador.api.v1.services.radius_calculation import CoordinatesService
 import logging
 
 logger = logging.getLogger(__name__)
-
 
 
 @extend_schema_view(
@@ -53,7 +54,8 @@ class VideoViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'delete']
 
     def get_queryset(self):
-        queryset = Video.objects.filter()
+        threshold = timezone.now() - timedelta(hours=25)
+        queryset = Video.objects.filter(created_at__gt=threshold)
 
         if self.request.method == 'GET':
             try:
