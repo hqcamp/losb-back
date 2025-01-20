@@ -6,7 +6,7 @@ class VideoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Video
         fields = '__all__'
-        read_only_fields = ['user', 'created_at', 'duration', 'thumbnail']
+        read_only_fields = ['user', 'created_at', 'duration']
 
 
 class VideoUrlSerializer(serializers.Serializer):

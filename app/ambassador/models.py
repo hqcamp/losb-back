@@ -40,11 +40,12 @@ class Video(models.Model):
 
         if is_file_url_updated:
             thumbnail_path = os.path.join(settings.MEDIA_ROOT, 'thumbnails', f'{self.pk}_thumbnail.jpg')
-            service = VideoProcessingService(self.file_url.url, thumbnail_path)
+            service = VideoProcessingService(self.file_url.url, thumbnail_path, thumbnail_exists=bool(self.thumbnail))
             self.duration = service.process_video()
 
-            with open(thumbnail_path, 'rb') as thumb_file:
-                self.thumbnail.save(os.path.basename(thumbnail_path), File(thumb_file), save=False)
+            if not self.thumbnail:
+                with open(thumbnail_path, 'rb') as thumb_file:
+                    self.thumbnail.save(os.path.basename(thumbnail_path), File(thumb_file), save=False)
 
             super().save(update_fields=["duration", "thumbnail"])
 

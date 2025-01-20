@@ -12,11 +12,12 @@ logger = logging.getLogger(__name__)
 
 
 class VideoProcessingService:
-    def __init__(self, video_url: str, thumbnail_path: str, time: int = 1):
+    def __init__(self, video_url: str, thumbnail_path: str, time: int = 1, thumbnail_exists: bool = False):
         self.video_url = video_url
         self.thumbnail_path = thumbnail_path
         self.time = time
         self.local_video_path = None
+        self.thumbnail_exists = thumbnail_exists
 
     def download_file(self):
         file_name = os.path.basename(self.video_url)
@@ -67,6 +68,9 @@ class VideoProcessingService:
     def generate_thumbnail(self):
         if not self.local_video_path:
             raise ValueError("Video local path is not set.")
+
+        if self.thumbnail_exists:
+            return
 
         ffmpeg_exe = ffmpeg.get_ffmpeg_exe()
         local_thumbnail = NamedTemporaryFile(suffix=".jpg", delete=False)
