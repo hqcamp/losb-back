@@ -1,8 +1,11 @@
 from rest_framework import serializers
 from ambassador.models import Video
+from ambassador.api.v1.validators import validate_location_field
 
 
 class VideoSerializer(serializers.ModelSerializer):
+    location = serializers.JSONField(validators=[validate_location_field])
+
     class Meta:
         model = Video
         fields = '__all__'
