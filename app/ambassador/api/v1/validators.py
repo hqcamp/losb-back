@@ -31,10 +31,10 @@ def validate_location(location):
     def check_decimal_places(value):
         str_value = str(value)
         integer_part, decimal_part = str_value.split('.')
-        return len(decimal_part) == expected_decimal_places
+        return len(decimal_part) <= expected_decimal_places
 
     if not check_decimal_places(latitude) or not check_decimal_places(longitude):
-        raise ValidationError(f"Coordinates must have exactly {expected_decimal_places} decimal places.")
+        raise ValidationError(f"Coordinates must have at most {expected_decimal_places} decimal places.")
 
 
 def validate_file_size(file, max_size_mb=settings.MAX_FILE_SIZE_MB):
