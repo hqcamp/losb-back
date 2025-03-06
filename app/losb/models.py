@@ -111,6 +111,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
 
+    tg_link = models.URLField(max_length=255, blank=True, null=True, verbose_name='Ссылка на канал в Telegram')
+    vk_link = models.URLField(max_length=255, blank=True, null=True, verbose_name='Ссылка на канал в VK')
+
     USERNAME_FIELD = 'telegram_id'
     REQUIRED_FIELDS = []
 

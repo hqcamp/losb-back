@@ -20,7 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('telegram_id', 'avatar_url', 'full_name', 'phone', 'location', 'birthday')
+        fields = ('telegram_id', 'avatar_url', 'full_name', 'phone', 'location', 'birthday', 'tg_link', 'vk_link')
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -87,3 +87,15 @@ class UserAvatarSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('avatar_url',)
+
+
+class UserTGLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('tg_link',)
+
+
+class UserVKLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('vk_link',)
