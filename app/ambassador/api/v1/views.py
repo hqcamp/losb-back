@@ -144,3 +144,53 @@ class SendToTelegramView(APIView):
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class VideoSwiperView(APIView):
+    serializer_class = VideoSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = LimitOffsetPagination
+
+    @extend_schema(
+        summary="Retrieve a video and nearby videos",
+        description=(
+            "Get a specific video by its ID and other videos within the specified radius from the video's location." 
+            "The radius is passed as a query parameter." 
+            "The limit parameter can be used to adjust the number of results returned (optional)"
+            "Requires authentication."
+        ),
+        responses={200: VideoSerializer(many=True)}
+    )
+    def get(self, request, video_id):
+        try:
+            video = Video.objects.get(id=video_id)
+        except Video.DoesNotExist:
+            return Response({"detail": "Video not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        radius = request.query_params.get('radius')
+        if radius is None:
+            return Response({"detail": "Missing 'radius' query parameter."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            radius = float(radius)
+        except ValueError:
+            return Response({"detail": "Invalid 'radius' parameter, must be a float."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            latitude = video.location["latitude"]
+            longitude = video.location["longitude"]
+        except KeyError:
+            return Response({"detail": "Invalid video location data."}, status=status.HTTP_400_BAD_REQUEST)
+
+        threshold = timezone.now() - timedelta(hours=25)
+        queryset = Video.objects.filter(created_at__gt=threshold)
+        nearby_videos = CoordinatesService.calculate_radius(queryset, latitude, longitude, radius)
+
+        all_videos = nearby_videos | Video.objects.filter(id=video_id)
+
+        paginator = self.pagination_class()
+        paginated_queryset = paginator.paginate_queryset(all_videos, request)
+
+        serializer = self.serializer_class(paginated_queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

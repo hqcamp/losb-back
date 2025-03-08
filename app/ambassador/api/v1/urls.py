@@ -5,7 +5,8 @@ from rest_framework.routers import DefaultRouter
 from ambassador.api.v1.views import (
     VideoViewSet,
     UserStoriesView,
-    SendToTelegramView
+    SendToTelegramView,
+    VideoSwiperView,
 )
 
 app_name = 'ambassador'
@@ -17,4 +18,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('stories/', UserStoriesView.as_view(), name='user-stories'),
     path('send-video-url/', SendToTelegramView.as_view(), name='send_video_url'),
+    path('videos/<int:video_id>/swiper/', VideoSwiperView.as_view(), name='video-swiper'),
 ]
