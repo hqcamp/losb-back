@@ -14,13 +14,20 @@ class CitySerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
+class UserSocialMediaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('tg_link', 'vk_link')
+
+
 class UserSerializer(serializers.ModelSerializer):
     location = CitySerializer()
     phone = PhoneSerializer()
+    social = UserSocialMediaSerializer(source="*")
 
     class Meta:
         model = User
-        fields = ('telegram_id', 'avatar_url', 'full_name', 'phone', 'location', 'birthday', 'tg_link', 'vk_link')
+        fields = ('telegram_id', 'avatar_url', 'full_name', 'phone', 'location', 'birthday', 'social')
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -87,9 +94,3 @@ class UserAvatarSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('avatar_url',)
-
-
-class UserSocialMediaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('tg_link', 'vk_link',)
