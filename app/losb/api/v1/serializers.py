@@ -89,13 +89,7 @@ class UserAvatarSerializer(serializers.ModelSerializer):
         fields = ('avatar_url',)
 
 
-class UserTGLinkSerializer(serializers.ModelSerializer):
+class UserSocialMediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('tg_link',)
-
-
-class UserVKLinkSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('vk_link',)
+        fields = ('tg_link', 'vk_link',)

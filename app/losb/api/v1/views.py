@@ -26,8 +26,7 @@ from losb.api.v1.serializers import (
     UserPhoneTGVerificationSerializer,
     PhoneSerializer,
     BotUrlSerializer,
-    UserTGLinkSerializer,
-    UserVKLinkSerializer,
+    UserSocialMediaSerializer,
 )
 from losb.api.v1.services.sms_verification import SmsVerificationService
 from losb.api.v1.services.telegram_verification import TelegramVerificationService
@@ -325,36 +324,11 @@ class TelegramWebhookAPIView(APIView):
         responses={
             200: UserSerializer,
         },
-        summary='Изменение ссылки на канал в Telegram',
+        summary='Изменение ссылок на соцсети',
     ),
 )
-class UserTGLinkUpdateView(generics.UpdateAPIView):
-    serializer_class = UserTGLinkSerializer
-    permission_classes = [IsAuthenticated, ]
-    http_method_names = ["patch"]
-
-    def get_object(self):
-        return self.request.user
-
-    def patch(self, request, *args, **kwargs):
-        user = self.get_object()
-        serializer = self.get_serializer(user, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        response_serializer = UserSerializer(user)
-        return Response(response_serializer.data)
-
-
-@extend_schema_view(
-    update=extend_schema(
-        responses={
-            200: UserSerializer,
-        },
-        summary='Изменение ссылки на канал в VK',
-    ),
-)
-class UserVKLinkUpdateView(generics.UpdateAPIView):
-    serializer_class = UserVKLinkSerializer
+class UserSocialMediaUpdateView(generics.UpdateAPIView):
+    serializer_class = UserSocialMediaSerializer
     permission_classes = [IsAuthenticated, ]
     http_method_names = ["patch"]
 
