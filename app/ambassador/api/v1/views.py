@@ -4,7 +4,8 @@ import requests
 from datetime import timedelta
 from django.utils import timezone
 from app.settings import AMBASSADOR_BOT_TOKEN
-from drf_spectacular.utils import extend_schema_view, extend_schema
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import ListAPIView
@@ -154,21 +155,46 @@ class VideoSwiperView(APIView):
     @extend_schema(
         summary="Retrieve a video and nearby videos",
         description=(
-            "Get a specific video by its ID and other videos within the specified radius from the video's location." 
-            "The radius is passed as a query parameter." 
-            "The limit parameter can be used to adjust the number of results returned (optional)"
-            "Requires authentication."
+            "Get a specific video by its ID and other videos within the specified radius from the video's location."
+            " If the video does not exist, latitude and longitude must be provided as query parameters."
+            " The limit parameter can be used to adjust the number of results returned (optional)."
+            " Requires authentication."
         ),
+        parameters=[
+            OpenApiParameter(name="latitude", type=OpenApiTypes.FLOAT, required=False, description="Latitude"),
+            OpenApiParameter(name="longitude", type=OpenApiTypes.FLOAT, required=False, description="Longitude"),
+            OpenApiParameter(name="radius", type=OpenApiTypes.FLOAT, required=True, description="Search radius (km)"),
+            OpenApiParameter(name="limit", type=OpenApiTypes.INT, required=False,
+                             description="Number of results to return per page"),
+            OpenApiParameter(name="offset", type=OpenApiTypes.INT, required=False,
+                             description="Results starting index"),
+        ],
         responses={200: VideoSerializer(many=True)}
     )
     def get(self, request, video_id):
+        video = None
+
         try:
             video = Video.objects.get(id=video_id)
+            latitude = video.location["latitude"]
+            longitude = video.location["longitude"]
+            video_exists = True
         except Video.DoesNotExist:
-            return Response({"detail": "Video not found."}, status=status.HTTP_404_NOT_FOUND)
+            latitude = request.query_params.get("latitude")
+            longitude = request.query_params.get("longitude")
+            video_exists = False
 
-        radius = request.query_params.get('radius')
-        if radius is None:
+        try:
+            latitude = float(latitude)
+            longitude = float(longitude)
+        except (ValueError, TypeError):
+            return Response({
+                "videoExists": video_exists,
+                "detail": "'latitude' and 'longitude' must be valid float values."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        radius = request.query_params.get("radius")
+        if not radius:
             return Response({"detail": "Missing 'radius' query parameter."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -177,20 +203,20 @@ class VideoSwiperView(APIView):
             return Response({"detail": "Invalid 'radius' parameter, must be a float."},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            latitude = video.location["latitude"]
-            longitude = video.location["longitude"]
-        except KeyError:
-            return Response({"detail": "Invalid video location data."}, status=status.HTTP_400_BAD_REQUEST)
-
         threshold = timezone.now() - timedelta(hours=25)
         queryset = Video.objects.filter(created_at__gt=threshold)
         nearby_videos = CoordinatesService.calculate_radius(queryset, latitude, longitude, radius)
 
-        all_videos = nearby_videos | Video.objects.filter(id=video_id)
+        if video:
+            all_videos = nearby_videos | Video.objects.filter(id=video_id)
+        else:
+            all_videos = nearby_videos
 
         paginator = self.pagination_class()
         paginated_queryset = paginator.paginate_queryset(all_videos, request)
 
         serializer = self.serializer_class(paginated_queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return paginator.get_paginated_response({
+            "videoExists": video_exists,
+            "data": serializer.data
+        })
