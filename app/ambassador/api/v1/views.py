@@ -208,7 +208,9 @@ class VideoSwiperView(APIView):
         nearby_videos = CoordinatesService.calculate_radius(queryset, latitude, longitude, radius)
 
         if video:
-            all_videos = nearby_videos | Video.objects.filter(id=video_id)
+            nearby_videos = nearby_videos.exclude(id=video_id)
+            all_videos = list(nearby_videos)
+            all_videos.insert(0, video)
         else:
             all_videos = nearby_videos
 
