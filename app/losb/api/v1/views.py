@@ -337,8 +337,11 @@ class UserSocialMediaUpdateView(generics.UpdateAPIView):
 
     def patch(self, request, *args, **kwargs):
         user = self.get_object()
+        print(f"Request data:\n{request.data}", sep="\n")
         serializer = self.get_serializer(user, data=request.data, partial=True)
+        if not serializer.is_valid(): print(serializer.errors, sep="\n")
         serializer.is_valid(raise_exception=True)
         serializer.save()
         response_serializer = UserSerializer(user)
+        print(f"Response data:\n{response_serializer.data}")
         return Response(response_serializer.data)
