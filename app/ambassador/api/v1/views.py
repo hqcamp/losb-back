@@ -55,7 +55,7 @@ class VideoViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'delete']
 
     def get_queryset(self):
-        threshold = timezone.now() - timedelta(hours=25)
+        threshold = timezone.now() - timedelta(hours=73)
         queryset = Video.objects.filter(created_at__gt=threshold)
 
         if self.request.method == 'GET':
@@ -203,7 +203,7 @@ class VideoSwiperView(APIView):
             return Response({"detail": "Invalid 'radius' parameter, must be a float."},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        threshold = timezone.now() - timedelta(hours=25)
+        threshold = timezone.now() - timedelta(hours=73)
         queryset = Video.objects.filter(created_at__gt=threshold)
         nearby_videos = CoordinatesService.calculate_radius(queryset, latitude, longitude, radius)
 
